@@ -2,6 +2,7 @@
 .Rhistory
 .RData
 *.xlsx
-*.rds
+data-raw/*.rds
+data-models/*.rds
 *.Rdata
 README-BEN.md
