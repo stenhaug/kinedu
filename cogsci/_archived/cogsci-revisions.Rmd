@@ -1,0 +1,101 @@
+
+```{r setup, include=FALSE}
+library(tidyverse)
+library(rsample)
+library(here)
+library(mirt)
+library(quantregGrowth)
+theme_set(theme_classic())
+```
+
+```{r load_data}
+survey_raw <- read_rds(here("data-clean/survey_raw.rds"))
+
+responses_long <- read_rds(here("data-clean/responses_long.rds"))
+responses_wide <- read_rds(here("data-clean/responses_wide.rds"))
+
+milestones <- read_rds(here("data-clean/milestones.rds"))
+areas <- read_rds(here("data-clean/areas.rds"))
+```
+
+```{r remove_ages}
+# remove ages <= 1
+
+by_age <-
+	responses_long %>%
+	group_by(id) %>%
+	summarize(
+		age = age[1],
+		response = sum(response)
+	) %>%
+	filter(age > 1)
+
+responses_wide <- responses_wide %>% filter(id %in% by_age$id)
+responses_long <- responses_long %>% filter(age > 1)
+```
+
+```{r}
+source("~/Desktop/cvirt/R/helpers.R")
+
+# this does stratified-by-person masking
+mask_item_response_data <- function(data, percent_mask){
+	notna <- which(!is.na(as.numeric(data)))
+	makena <- sample(notna, round(percent_mask * length(notna)))
+	data[makena] <- NA
+	data
+}
+
+# now let's make train and test data
+train <- 
+	select(responses_wide, -1) %>% 
+	apply(1, mask_item_response_data, 0.3) %>% 
+	t()
+test <- select(responses_wide, -1) %>% as.matrix()
+test[!is.na(select(responses_wide, -1)) & !is.na(train)] <- NA
+```
+
+```{r}
+models <-
+	tibble(
+		dim = c(1, 1, 2, 2),
+		itemtype = c("Rasch", "2PL", "2PL", "2PL"),
+		method = c("EM", "EM", "EM", "QMCEM")
+	) %>%
+	mutate(
+		model = pmap(., ~ mirt(select(responses_wide, -1), ..1, ..2, method = ..3, technical = list(NCYCLES = 100)))
+	)
+
+models %>%
+	mutate(nestpars = model %>% map_dbl(~ .@Model$nestpars)) %>%
+	arrange(nestpars) %>%
+	mutate(
+		in_sample_log_lik = model %>% map_dbl(~ .@Fit$logLik),
+		anova_p = map2_dbl(model, lag(model), get_p_from_anova),
+		aic = model %>% map_dbl(~ .@Fit$AIC),
+		bic = model %>% map_dbl(~ .@Fit$BIC)
+	)
+```
+
+```{r}
+# run cv by fitting each model to the train data and assess on test data
+cv <-
+	models %>%
+	select(dim:method) %>%
+	mutate(
+		in_model = pmap(., ~ mirt(train, ..1, ..2, method = ..3, technical = list(NCYCLES = 500))),
+		fscores = map2(in_model, method, ~ fscores(.x, QMC = .y == "QMCEM", rotate = "none")),
+		p = map2(in_model, fscores, get_p),
+		eval = p %>% map(evaluate_p, train, test)
+	)
+
+# see what we got
+cv %>%
+	select(-in_model, -fscores, -p) %>% 
+	unnest_wider(eval) %>% 
+	View()
+
+save.image("cogsci-revisions.Rdata")
+```
+
+
+

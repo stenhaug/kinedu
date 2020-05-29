@@ -1,0 +1,6 @@
+\author{{\large \bf Benjamin A. Stenhaug (stenhaug@stanford.edu)} \\
+	School of Education, 485 Lasuen Mall \\
+	Stanford, CA 94305 USA
+	\AND {\large \bf Michael C. Frank (mcfrank@stanford.edu)} \\
+	Department of Psychology, 450 Jane Stanford Way \\
+	Stanford, CA 94305 USA}
