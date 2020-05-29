@@ -1,6 +1,6 @@
 # cogsci submission (5/29/2020)
 
-This repo produces the paper ["The latent factor structure of developmental change in early childhood"](cogsci/_submission_final/thelatent_0529.pdf) by Ben Stenhaug & Mike Frank.
+This repo produces the paper ["The latent factor structure of developmental change in early childhood"](cogsci/_submission_final/thelatent_0529.pdf) by Ben Stenhaug & Mike Frank. Data is made available by [Kinedu Inc.](https://www.kinedu.com/).
 
 The paper can be reproduced as follows:
 
