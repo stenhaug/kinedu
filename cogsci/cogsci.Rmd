@@ -39,7 +39,7 @@ theme_set(theme_classic())
 ```
 
 ```{r load_data}
-survey_raw <- read_rds(here("data-clean/survey_raw.rds"))
+# survey_raw <- read_rds(here("data-clean/survey_raw.rds"))
 
 responses_long <- read_rds(here("data-clean/responses_long.rds"))
 responses_wide <- read_rds(here("data-clean/responses_wide.rds"))
@@ -179,7 +179,6 @@ We frame the assessment of the dimensionality of child development as a model co
 ## Models
 
 Item response theory offers a suite of models with which to model item response data. We adopt the notation used in @chalmers2012mirt. Let $i = 1, \ldots, I$ represent the distinct children and $j = 1, \ldots, J$ the developmental milestones. The item response data is stored in a matrix, $y$, where element $y_{ij}$ denotes if the $i$th child has or has not achieved the $j$th developmental milestone as reported by their parent/guardian. Each model represents the $i$th child's development using $m$ latent factors $\boldsymbol{\theta}_{i}=(\theta_1, \dots, \theta_m)$. The $j$th milestone's discriminations (i.e. slopes) $\boldsymbol{a_j}=(a_1, \dots, a_m)$ capture the latent factor loadings onto that milestone. 
-
 We fit five two-parameter logistic (2PL) models where a child’s development is represented by $m = 1, \ m = 2, \ m = 3, \ m = 4$ and $m = 5$ latent factors. Hereafter, we, for example, refer to a 2PL model with $m = 4$ latent factors as a 4F 2PL model. As is common, we estimate all models using marginal maximum likelihood estimation (MMLE), which integrates over a generic distribution for $\boldsymbol{\theta}$ and therefore estimates only item parameters [@baker2004item]. According to the 2PL model, the probability of a child having achieved a developmental milestone is
 $$
 P(y_{ij} = 1 | \boldsymbol{\theta_i}, \boldsymbol{a_j}, b_j) = \sigma(\boldsymbol{a}_{j}^{\top}\boldsymbol{\theta_i} + b_j)
@@ -193,7 +192,7 @@ $$
 P(y_{ij} = 1 | \theta_0, \theta_s, a_0, a_s) = \sigma(a_0\theta_0 + a_s\theta_s + b_j).
 $$
 
-Computing is done in R [@rcore], model fitting in the R package mirt [@chalmers2012mirt], and data wrangling/visualization in the set of R packages known as the tidyverse [@tidy].
+Computing is done in R [@rcore], model fitting in the R package mirt [@chalmers2012mirt], and data wrangling/visualization in the set of R packages known as the tidyverse [@tidy]. Materials to reproduce this paper are available at github.com/stenhaug/kinedu.
 
 ```{r icc, fig.cap = "Example item characteristic curves. Babbling is unrelated to a child's development whereas finding objects on the floor is highly related to development."}
 # choose items
